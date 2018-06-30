@@ -6,6 +6,7 @@
 #include <string>
 #include <windows.h>
 #include <fstream>
+#include <Montador.h>
 
 void chargeLoader(char *fileName, uint8_t *memory);
 void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDirectory, uint16_t *bytesNumber);

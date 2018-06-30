@@ -8,9 +8,10 @@ Montador::~Montador()
 {
 }
 
-Montador::Montador()
+Montador::Montador(char fileName, int memory)
 {
-    //ctor
+    fileName = this.fileName;
+    memory = this.memory;
 }
 
 /* PRIMEIRO PASSO DO MONTADOR */

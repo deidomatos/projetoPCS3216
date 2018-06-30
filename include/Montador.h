@@ -12,7 +12,7 @@ class Montador
     public:
         Montador();
         virtual ~Montador();
-        Montador(fileName, );
+        Montador(char fileName, int memory);
         void mounter1Passo(char *fileName, uint16_t *beginning, uint8_t *bytesNumber);
         void mounter2Passos(char *fileName, uint16_t *beginning, uint8_t *bytesNumber, symbol_t* *head);
 };
