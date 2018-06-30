@@ -8,7 +8,7 @@
 #include <fstream>
 #include <Montador.h>
 
-void chargeLoader(char *fileName, uint8_t *memory);
+void chargeLoaderOnVirtualMachine(char *fileName, uint8_t *memory);
 void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDirectory, uint16_t *bytesNumber);
 void pushSymbol(symbol_t* *head, char *name);
 int symbolSearch(symbol_t* *head, char *name);
@@ -42,7 +42,7 @@ int main()
     // Inicia carregando o loader na memória
     strcpy(fileName, userDirectory);
     strcat(fileName, "loader.txt");
-    chargeLoader(fileName, memory);
+    chargeLoaderOnVirtualMachine(fileName, memory);
 
     while (1) {
 
@@ -84,7 +84,7 @@ int main()
         }
 
         else if (!strncmp(chosenCommand, "$RUN", 4)) {
-            chargeLoader("loader.txt", memory);
+            chargeLoaderOnVirtualMachine("loader.txt", memory);
 
             strcpy(fileName, userDirectory);
             strcat(fileName, chosenCommand + 5);
@@ -308,14 +308,12 @@ void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDi
     fclose(exit);
 }
 
-void chargeLoader(char *fileName, uint8_t *memory) {
+void chargeLoaderOnVirtualMachine(char *fileName, uint8_t *memory) {
     FILE *program;
     program = fopen(fileName, "r");
-    if (program == NULL) {
-        printf("Erro na abertura do arquivo\n");
         return;
     }
-    // Lê arquivo e o coloca na memória
+    // Lê arquivo e o coloca na memória para uso na Máquina Virtual
     for (int i = 0; i < 44; i++) fscanf(program, "%02X", &memory[0x0 + i]);
     fclose(program) ;
 }
