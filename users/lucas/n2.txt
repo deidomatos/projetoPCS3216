@@ -1,0 +1,27 @@
+    @    3000    ; Carregamento do programa
+MULT
+    MM   N2
+    *    N2   
+    PD   0002    ; Imprime valor de N2
+    RS   MULT
+INIC
+    GD   0001    ; Realiza leitura dos 2 bytes digitados
+    SC   MULT
+    JP   DNV
+DNVO
+    GD   0001
+    -    UM
+    JZ   INIC
+    SO   0000    ; Retorna o comando do projeto ao SO
+N2QU  
+	K    0
+UMEST  
+	K    1
+    #    INIC    
+	
+	
+	
+	
+	
+	
+	

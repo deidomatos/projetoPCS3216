@@ -1,0 +1,26 @@
+    @    e000    ; Realiza o carregamento do programa
+NEGA
+    PD   0002
+    +    UMEST
+    JZ   ACAB
+    JP   NEGA
+POSI
+    PD   0002
+    -    UM
+    JZ   ACAB
+    JP   POSI
+INIC
+    GD   0001    ; Leitura dos 2 bytes digitados
+    JZ   ACABA   ; Termina se vier 0
+    JN   NEGA    ; Incrementa até chegar zero se vier < 0
+    JP   POSI    ; Decrementa até chegar zero se > 0
+ACABA
+    SO   0000    ; Retorna o comando para SO
+UMEST 
+	K       1
+    #    INIC    
+	
+	
+	
+	
+	

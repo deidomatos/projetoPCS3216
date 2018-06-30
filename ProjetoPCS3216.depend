@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1530179385 source:c:\users\david\desktop\projetopcs3216\projetopcs3216\main.cpp
+	<iostream>
+	<string>
+	<stdio.h>
+	<stdlib.h>
+	<dirent.h>
+	<windows.h>
+	<fstream>
+
+1530179663 source:c:\users\david\desktop\projetopcs3216\projetopcs3216\src\montador.cpp
+	"Montador.h"
+
+1530179663 c:\users\david\desktop\projetopcs3216\projetopcs3216\include\montador.h
+
