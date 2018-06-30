@@ -8,7 +8,7 @@
 #include <fstream>
 #include <Montador.h>
 
-void chargeLoaderOnVirtualMachine(char *fileName, uint8_t *memory);
+void chargeLoaderOnMemory(char *fileName, uint8_t *memory);
 void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDirectory, uint16_t *bytesNumber);
 void pushSymbol(symbol_t* *head, char *name);
 int symbolSearch(symbol_t* *head, char *name);
@@ -39,10 +39,12 @@ int main()
     if(userDirectory[strlen(userDirectory) - 1] == '\n')
         userDirectory[strlen(userDirectory) - 1] = NULL;
 
-    // Inicia carregando o loader na memória
+    /* Realiza o carregamento do LOADER na memória
+    para permitir o carregamento de novos
+    programas na memória */
     strcpy(fileName, userDirectory);
     strcat(fileName, "loader.txt");
-    chargeLoaderOnVirtualMachine(fileName, memory);
+    chargeLoaderOnMemory(fileName, memory);
 
     while (1) {
 
@@ -84,7 +86,7 @@ int main()
         }
 
         else if (!strncmp(chosenCommand, "$RUN", 4)) {
-            chargeLoaderOnVirtualMachine("loader.txt", memory);
+            chargeLoaderOnMemory("loader.txt", memory);
 
             strcpy(fileName, userDirectory);
             strcat(fileName, chosenCommand + 5);
@@ -151,103 +153,78 @@ int symbolSearch(symbol_t* *head, char *name) {
     return 0;
 }
 
-void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDirectory, uint16_t *bytesNumber) {
-    FILE *program;
-    FILE *exit;
-    int8_t operation;
-    int16_t operand;
+void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName,
+                      char *userDirectory, uint16_t *bytesNumber) {
+    FILE *program; FILE *exit; int8_t operation; int16_t operand;
     int8_t accumulator = 0x00;
-    int aux;
-    char auxVar[10];
-    int HALT = 0;
-    int indirectMode = 0;
-    char arquivo_exit[150];
-
+    int aux; char auxVar[10];
+    int stopCondition = 0; int indirectMode = 0; char arquivo_exit[150];
     program = fopen(fileName, "r");
-    if (program == NULL) {
-        printf("Erro na abertura do arquivo\n");
-        return;
-    }
 
     strcpy(arquivo_exit, userDirectory);
     strcat(arquivo_exit, "exit.txt");
     exit = fopen(arquivo_exit, "w");
-    if (exit == NULL) {
-        printf("Erro na abertura do arquivo\n");
-        return;
-    }
-
     aux = fscanf(program, "%02X", bytesNumber);
     aux = fscanf(program, "%02X", bytesNumber);
     aux = fscanf(program, "%02X", bytesNumber);
     if (aux != 1) printf("Erro ao realizara leitura do arquivo proposto\n");
     rewind(program);
 
-    while(!HALT) {
-
-        operation = (memory[CI] / 0x10); // Realiza a identificação do tipo de instrução solicitada
+    while(!stopCondition) {
+        operation = (memory[CI] / 0x10); // Realiza a identificação da intrução
         if (operation == 0x3 || operation == 0xB || operation == 0xC)
             operand = (memory[CI] % 0x10);
         else operand = (memory[CI] % 0x10)*0x100 + memory[CI + 0x1];
 
         switch (operation) {
-
         case 0x0: // jump incondicional
             if(!indirectMode) CI = operand;
             else CI = memory[operand]*0x100 + memory[operand + 0x1];
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x1: // jump se accumulator for 0
             if (accumulator == 0 && !indirectMode) CI = operand;
             else if(accumulator == 0) CI = memory[operand]*0x100 + memory[operand + 0x1];
             else CI += 2;
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x2: // jump se accumulator for negativo
             if (accumulator < 0 && !indirectMode) CI = operand;
             else if(accumulator < 0) CI = memory[operand]*0x100 + memory[operand + 0x1];
             else CI += 2;
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x3: // instrucao de controle
             switch (operand) {
 
             case 0x0: // halt machine
-                printf("Halt Machine\n\n");
-                HALT = 1;
+                printf("Parada condicional\n\n");
+                stopCondition = 1;
                 break;
-
             case 0x2: // indirect
                 indirectMode = 1;
                 CI += 1;
                 break;
             }
             break;
-
         case 0x4: // soma
             if(!indirectMode) accumulator += memory[operand];
             else accumulator += memory[memory[operand]*0x100 + memory[operand + 0x1]];
             CI += 2;
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x5: // subtracao
             if(!indirectMode) accumulator -= memory[operand];
             else accumulator -= memory[memory[operand]*0x100 + memory[operand + 0x1]];
             CI += 2;
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x6: // multiplicacao
             if(!indirectMode) accumulator *= memory[operand];
             else accumulator *= memory[memory[operand]*0x100 + memory[operand + 0x1]];
             CI += 2;
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
-
         case 0x7: // divisao
             if(!indirectMode) accumulator /= memory[operand];
             else accumulator /= memory[memory[operand]*0x100 + memory[operand + 0x1]];
@@ -283,19 +260,17 @@ void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDi
             indirectMode = 0; // Retornará ao endereçamento direto em todos os casos
             break;
 
-        case 0xB: // chamada do sistema operacional
-            HALT = 1;
+        case 0xB: // Chamada ao SO
+            stopCondition = 1;
             break;
 
-        case 0xC: // entrada, exit e interrupcao
+        case 0xC: // Entrada, interrupção e saída
             switch (operand) {
-
             case 0x0:
                 fgets(auxVar, sizeof(auxVar)-1, program);
                 sscanf(auxVar, "%02X", &accumulator);
                 CI += 1;
                 break;
-
             case 0x4:
                 fprintf(exit, "%02X\n", accumulator);
                 CI += 1;
@@ -308,12 +283,12 @@ void loopInstruction (uint16_t CI, uint8_t *memory, char *fileName, char *userDi
     fclose(exit);
 }
 
-void chargeLoaderOnVirtualMachine(char *fileName, uint8_t *memory) {
+void chargeLoaderOnMemory(char *fileName, uint8_t *memory) {
     FILE *program;
     program = fopen(fileName, "r");
         return;
     }
-    // Lê arquivo e o coloca na memória para uso na Máquina Virtual
+    // Lê arquivo e o coloca na memória
     for (int i = 0; i < 44; i++) fscanf(program, "%02X", &memory[0x0 + i]);
     fclose(program) ;
 }

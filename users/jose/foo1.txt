@@ -1,0 +1,12 @@
+    @    2000      ; Carregamento do programa
+INICIO
+    LD   VARIAVEL  ; Leitura de 2 bytes da variável
+    PD   0002      ; Imprime a variável 
+    SO   0000      ; Retorno para o SO
+VARIAVEL 
+	K    15        ; VAR = 15
+    #    INICIO    
+	
+	
+	
+	

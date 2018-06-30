@@ -1,0 +1,29 @@
+    @    0000   ; Inicia carregamento em 0000
+INICIO
+    GD   0000   
+    *    DES2   
+    MM   PC      
+    GD   0000    
+    +    PC     
+    MM   PC     
+    GD   0000    
+    MM   AUX
+    JP   LOOP
+LOOP
+    GD  0000
+    PD  0001
+    LD  AUX
+    -   UNIT
+    MM  AUX
+    JZ  EXEC
+    JP  LOOP
+RODA
+    LV  0000
+    PD  0001
+    GD  0000
+    PD  0001
+    RS  INICIO  ; Finaliza carregamento e executa programa
+DES2    K  100
+PC      K  0
+AUX     K  0
+UNIT    K  1
